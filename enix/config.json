@@ -1,40 +1,48 @@
 {
-  "market": "Marrakech, Morocco",
-  "minimum_qualified_score": 55,
+  "market": "Casablanca, Morocco",
+  "market_aliases": ["casablanca", "casa", "dar el beida", "dar al beida"],
+  "minimum_qualified_score": 60,
   "default_language_hint": "FR",
   "weights": {
     "email": 20,
     "website": 15,
-    "instagram": 8,
-    "linkedin": 3,
-    "target_segment": 20,
-    "rating_4_3_plus": 8,
+    "instagram": 6,
+    "linkedin": 4,
+    "target_segment": 22,
+    "rating_4_3_plus": 6,
     "rating_4_6_plus_bonus": 4,
-    "reviews_25_plus": 5,
+    "reviews_25_plus": 4,
     "reviews_100_plus_bonus": 5,
     "reviews_300_plus_bonus": 4,
-    "marrakech_address": 8
+    "target_market_address": 10,
+    "high_ticket_signal": 10
   },
+  "high_ticket_terms": [
+    "luxury", "luxe", "prestige", "premium", "haut standing", "haut de gamme",
+    "5 star", "5-star", "palace", "resort", "developer", "promoteur",
+    "promotion immobiliere", "promotion immobilière", "corporate", "convention",
+    "conference", "congrès", "congres", "gala", "wedding", "événement", "event"
+  ],
   "segments": [
     {
-      "name": "Hospitality",
-      "patterns": ["riad", "hotel", "resort", "guest house", "guesthouse", "hostel", "lodge", "villa", "maison d'hôtes", "maison d'hotes"],
-      "service": "Hospitality photography, lifestyle video and social content"
+      "name": "Premium Real Estate",
+      "patterns": ["real estate", "property", "immobilier", "immobilière", "immobiliere", "developer", "promoteur", "promotion immobilière", "promotion immobiliere", "résidence", "residence", "villa"],
+      "service": "Premium real-estate photography, cinematic video, launch content and sales visuals"
     },
     {
-      "name": "Travel & Tourism",
-      "patterns": ["travel", "tour", "tourist", "tourism", "excursion", "experience", "dmc", "transport touristique"],
-      "service": "Tourism content production and photo/video partnerships"
+      "name": "Luxury Hospitality",
+      "patterns": ["hotel", "hôtel", "resort", "palace", "hospitality", "5 star", "5-star"],
+      "service": "Luxury hospitality photography, lifestyle video, social content and event coverage"
     },
     {
-      "name": "Events",
-      "patterns": ["event", "wedding", "weddings", "venue", "planner", "organisation événement", "organisation evenement"],
-      "service": "Event photography, videography and visual production"
+      "name": "Corporate Events",
+      "patterns": ["event", "événement", "evenement", "conference", "congrès", "congres", "corporate", "wedding", "venue", "planner", "agency", "agence événementielle"],
+      "service": "Corporate event photography, videography and branded visual production"
     },
     {
-      "name": "Real Estate",
-      "patterns": ["real estate", "property", "immobilier", "immobilière", "immobiliere", "apartment", "residence", "developer", "promotion immobilière", "promotion immobiliere"],
-      "service": "Real-estate photography, video and property marketing visuals"
+      "name": "Premium Travel & Tourism",
+      "patterns": ["travel", "tour", "tourism", "dmc", "concierge", "luxury travel", "business travel"],
+      "service": "Premium tourism content production and photo/video partnerships"
     }
   ]
 }
