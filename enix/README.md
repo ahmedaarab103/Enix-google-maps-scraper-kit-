@@ -1,94 +1,56 @@
-# Enix Outreach Pipeline
+# Enix Outreach Pipeline — Casablanca High Ticket
 
-This folder turns Google Maps scrape results into a clean, deduplicated and scored prospect list for Enix.
+The current focus is **Casablanca** and **higher-ticket prospects**.
 
-## 1. Scrape one target segment
+Priority segments:
+1. Premium / luxury real-estate developers and agencies
+2. 4–5 star hotels with events, MICE and premium hospitality
+3. Corporate event agencies and premium event venues
+4. Premium travel, DMC and concierge companies
 
-Start the local scraper:
+## First scrape
+
+Start Docker:
 
 ```bash
 docker compose up -d
 ```
 
-Hospitality example:
+Run the high-ticket Casablanca pack:
 
 ```powershell
-py scripts\scrape.py --keywords-file enix\keywords\hospitality.txt --city "Marrakech, Morocco" --depth 5 --socials --out out\hospitality-raw.csv
+py scripts\scrape.py --keywords-file enix\keywords\casablanca-high-ticket.txt --city "Casablanca, Morocco" --depth 5 --socials --out out\casablanca-high-ticket-raw.csv
 ```
 
-Repeat with:
-
-- `enix/keywords/travel-tourism.txt`
-- `enix/keywords/events.txt`
-- `enix/keywords/real-estate.txt`
-
-Keep jobs conservative: one at a time, depth 5 initially.
-
-## 2. Dedupe + qualify
+Then dedupe and score:
 
 ```powershell
-py enix\prepare_leads.py out\hospitality-raw.csv
+py enix\prepare_leads.py out\casablanca-high-ticket-raw.csv --out out\casablanca-all.csv --qualified-out out\casablanca-qualified.csv
 ```
 
-Outputs:
+Use `out/casablanca-qualified.csv` as the prospect pool for research and cold email.
 
-- `out/enix-leads.csv` — all unique processed businesses
-- `out/enix-qualified.csv` — only businesses above the configured threshold that have an email
+## High-ticket qualification
 
-## 3. How Enix scoring works
+The score prioritizes:
+- public business email
+- real website
+- target high-ticket sector
+- Casablanca presence
+- premium/luxury/corporate signals
+- social presence
+- healthy rating/review volume
 
-The deterministic score favors:
+A high score is a **research priority**, not an automatic permission to email.
 
-- contactable businesses
-- active websites/social presence
-- Enix target sectors
-- Marrakech businesses
-- stronger Google ratings/review volume
-
-It does **not** automatically decide who should receive an email. The score prioritizes which leads should be researched first.
-
-## 4. Outreach workflow
-
-Recommended statuses:
+## Outreach stages
 
 `NEW → RESEARCHED → READY_TO_CONTACT → CONTACTED → FOLLOWUP_1 → FOLLOWUP_2 → REPLIED`
 
-Terminal statuses:
+Terminal states:
 
 `INTERESTED / NOT_INTERESTED / BOUNCED / DO_NOT_CONTACT`
 
-Before sending, check:
+Before outreach, verify the business, use an appropriate public business contact, check previous Enix conversations, and create one real personalization observation.
 
-1. The business is still relevant.
-2. The email is a suitable public business contact.
-3. There is no existing Enix conversation.
-4. The prospect has not opted out.
-5. A real website/business observation exists for personalization.
-
-## 5. Google Sheets handoff
-
-Import `out/enix-qualified.csv` into the Enix Outreach CRM Google Sheet.
-
-The extra columns are intentionally CRM-ready:
-
-- Enix segment
-- qualification score
-- reason for fit
-- recommended service
-- language
-- personalization observation
-- email subject/body
-- contact/follow-up dates
-- reply status
-- notes
-
-## 6. Sending strategy
-
-Start small: approximately 5 new, researched prospects per weekday.
-
-Follow-up policy:
-
-- Follow-up 1: around 4 business days after first contact
-- Follow-up 2: around 7 business days after follow-up 1
-- Stop immediately when the prospect replies
-- Never send more than 2 follow-ups
+Start with approximately 5 researched new contacts per weekday while sender reputation and response quality are being validated.
