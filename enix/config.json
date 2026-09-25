@@ -1,0 +1,40 @@
+{
+  "market": "Marrakech, Morocco",
+  "minimum_qualified_score": 55,
+  "default_language_hint": "FR",
+  "weights": {
+    "email": 20,
+    "website": 15,
+    "instagram": 8,
+    "linkedin": 3,
+    "target_segment": 20,
+    "rating_4_3_plus": 8,
+    "rating_4_6_plus_bonus": 4,
+    "reviews_25_plus": 5,
+    "reviews_100_plus_bonus": 5,
+    "reviews_300_plus_bonus": 4,
+    "marrakech_address": 8
+  },
+  "segments": [
+    {
+      "name": "Hospitality",
+      "patterns": ["riad", "hotel", "resort", "guest house", "guesthouse", "hostel", "lodge", "villa", "maison d'hôtes", "maison d'hotes"],
+      "service": "Hospitality photography, lifestyle video and social content"
+    },
+    {
+      "name": "Travel & Tourism",
+      "patterns": ["travel", "tour", "tourist", "tourism", "excursion", "experience", "dmc", "transport touristique"],
+      "service": "Tourism content production and photo/video partnerships"
+    },
+    {
+      "name": "Events",
+      "patterns": ["event", "wedding", "weddings", "venue", "planner", "organisation événement", "organisation evenement"],
+      "service": "Event photography, videography and visual production"
+    },
+    {
+      "name": "Real Estate",
+      "patterns": ["real estate", "property", "immobilier", "immobilière", "immobiliere", "apartment", "residence", "developer", "promotion immobilière", "promotion immobiliere"],
+      "service": "Real-estate photography, video and property marketing visuals"
+    }
+  ]
+}
