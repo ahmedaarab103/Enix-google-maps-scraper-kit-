@@ -41,9 +41,20 @@ if ($LASTEXITCODE -ne 0) { throw "Scrape failed with exit code $LASTEXITCODE" }
 & $python "enix\prepare_leads.py" $raw --out $all --qualified-out $qualified
 if ($LASTEXITCODE -ne 0) { throw "Lead preparation failed with exit code $LASTEXITCODE" }
 
-Copy-Item -Force $qualified "out\casablanca-qualified-latest.csv"
-Copy-Item -Force $all "out\casablanca-all-latest.csv"
+$latestQualified = Join-Path $outDir "casablanca-qualified-latest.csv"
+$latestAll = Join-Path $outDir "casablanca-all-latest.csv"
+Copy-Item -Force $qualified $latestQualified
+Copy-Item -Force $all $latestAll
+
+# Optional bridge to a synced Google Drive/OneDrive folder.
+# Example: setx ENIX_LEADS_SYNC_DIR "G:\My Drive\ChatGPT\Enix Outreach"
+if ($env:ENIX_LEADS_SYNC_DIR) {
+  New-Item -ItemType Directory -Force -Path $env:ENIX_LEADS_SYNC_DIR | Out-Null
+  Copy-Item -Force $latestQualified (Join-Path $env:ENIX_LEADS_SYNC_DIR "casablanca-qualified-latest.csv")
+  Copy-Item -Force $latestAll (Join-Path $env:ENIX_LEADS_SYNC_DIR "casablanca-all-latest.csv")
+  Write-Host "Synced latest lead files to $env:ENIX_LEADS_SYNC_DIR"
+}
 
 Write-Host "Done."
 Write-Host "Qualified leads: $qualified"
-Write-Host "Latest file: out\casablanca-qualified-latest.csv"
+Write-Host "Latest file: $latestQualified"
