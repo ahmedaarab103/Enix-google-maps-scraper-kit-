@@ -6,6 +6,7 @@ This folder adds a provider-independent, zero-dependency pre-send safety gate to
 
 - Do not use Resend for unsolicited cold email: its acceptable-use rules prohibit cold outreach and scraped lists.
 - Do not use Hostinger Mail for unsolicited cold email: its mass-mailing policy permits solicited email only.
+- WENIX's existing normal-business mailbox is at **Zoho Mail** (user-confirmed). Zoho Mail's September 2, 2026 usage policy explicitly prohibits promotional, marketing, bulk, and automated emails, so do NOT connect that mailbox to an automated cold outreach sequence. Preserve it for normal replies and business correspondence. The WENIX public sample config intentionally omits the full mailbox address. Check the exact mailbox and authentication privately before any one-to-one use.
 - For relevant, lawful B2B outreach, consider Apollo (already connected to ChatGPT but no mailboxes connected as of 2026-10-10), or Smartlead. Sending mailboxes must also permit the activity. Follow applicable laws and provider policies.
 - No provider can promise a mailbox will never be rate-limited.
 - Google Maps scraping can violate Google's Terms of Service. The existing scraper remains available but is not run or scheduled here. Use data collected with appropriate permission or a licensed/independently verified B2B research source instead.
@@ -62,7 +63,7 @@ Before launch export ALL historical ENIX contacts from both Hostinger Sent and R
 
 ## Mailboxes / sequences
 
-1. Link two different, authorized outreach mailboxes to Apollo or another purpose-built sequencer. Do not route unsolicited cold outreach through either Resend or Hostinger. Keep the existing Enix contact mailbox for clients and active conversations.
+1. Link two different, authorized outreach mailboxes to Apollo or another purpose-built sequencer. Do not route unsolicited or automated cold outreach through Resend, Hostinger Mail, **or Zoho Mail**. Keep Enix's Hostinger contact inbox and Wenix's Zoho business inbox for normal client correspondence. Mailbox providers must explicitly permit the intended prospecting before connecting.
 2. Verify MX (where applicable), SPF, DKIM and DMARC alignment and public domain resolution. Address any Sender Domain Not Found errors first.
 3. Leave sequences INACTIVE until sender policies, mailbox status, contact permissions and recipient data all pass review.
 4. Sequence: day 0 initial; day 3 first follow-up; day 8 final follow-up. Stop on reply, booking, unsubscribe, bounce, or out-of-office hold. Use company-level reply pause where supported.
