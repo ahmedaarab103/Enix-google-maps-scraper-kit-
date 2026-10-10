@@ -1,0 +1,8 @@
+private/
+exports/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.csv
+!*.example.csv
+__pycache__/
