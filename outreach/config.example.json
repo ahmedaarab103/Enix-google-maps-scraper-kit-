@@ -14,11 +14,14 @@
     },
     "WENIX": {
       "mailbox": null,
-      "provider": null,
+      "provider": "Zoho Mail",
       "campaign_active": false,
       "timezone": "Africa/Casablanca",
       "new_leads_per_day_start": 5,
-      "max_new_leads_per_day_before_review": 10
+      "max_new_leads_per_day_before_review": 10,
+      "mailbox_status": "user_confirmed_provider; identity and authentication not verified in this integration",
+      "usage": "normal_business_correspondence_only",
+      "outreach_sender_required": true
     }
   },
   "global_rules": {
@@ -43,7 +46,8 @@
       8
     ],
     "weekdays_only": true,
-    "office_hours_local": "09:00-17:00"
+    "office_hours_local": "09:00-17:00",
+    "no_zoho_mail_for_promotional_or_automated_cold_outreach": true
   },
   "markets": {
     "ENIX": {
