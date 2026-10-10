@@ -10,7 +10,8 @@
       "campaign_active": false,
       "timezone": "Africa/Casablanca",
       "new_leads_per_day_start": 5,
-      "max_new_leads_per_day_before_review": 10
+      "max_new_leads_per_day_before_review": 10,
+      "outreach_platform": "Sendvanta"
     },
     "WENIX": {
       "mailbox": null,
@@ -21,7 +22,8 @@
       "max_new_leads_per_day_before_review": 10,
       "mailbox_status": "user_confirmed_provider; identity and authentication not verified in this integration",
       "usage": "normal_business_correspondence_only",
-      "outreach_sender_required": true
+      "outreach_sender_required": true,
+      "outreach_platform": "Sendvanta"
     }
   },
   "global_rules": {
@@ -84,5 +86,17 @@
         "business services"
       ]
     }
-  }
+  },
+  "sender_platform": "Sendvanta",
+  "sender_platform_connection": "not_connected_to_ChatGPT",
+  "workspace_label": "Wenix/Enix",
+  "sender_platform_api_enabled": false,
+  "setup_gates": [
+    "verify sending-provider permits the intended cold B2B outreach",
+    "connect each authorized mailbox with SMTP and IMAP for reply/bounce handling",
+    "check SPF DKIM DMARC and sending domain DNS",
+    "import historic Enix Hostinger and Resend sends plus Wenix contacts into global suppression",
+    "seed delivery tests and review sequence copy",
+    "activate only after explicit confirmation"
+  ]
 }
