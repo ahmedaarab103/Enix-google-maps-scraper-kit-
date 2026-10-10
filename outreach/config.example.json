@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "live_sending_enabled": false,
+  "shared_identity_policy": "one_company_one_brand",
+  "source_scraping_enabled": false,
+  "senders": {
+    "ENIX": {
+      "mailbox": null,
+      "provider": null,
+      "campaign_active": false,
+      "timezone": "Africa/Casablanca",
+      "new_leads_per_day_start": 5,
+      "max_new_leads_per_day_before_review": 10,
+      "outreach_platform": "Sendvanta"
+    },
+    "WENIX": {
+      "mailbox": null,
+      "provider": "Zoho Mail",
+      "campaign_active": false,
+      "timezone": "Africa/Casablanca",
+      "new_leads_per_day_start": 5,
+      "max_new_leads_per_day_before_review": 10,
+      "mailbox_status": "user_confirmed_provider; identity and authentication not verified in this integration",
+      "usage": "normal_business_correspondence_only",
+      "outreach_sender_required": true,
+      "outreach_platform": "Sendvanta"
+    }
+  },
+  "global_rules": {
+    "require_human_approval": true,
+    "require_lawful_basis": true,
+    "require_verified_recipient": true,
+    "history_import_required": true,
+    "stop_on": [
+      "reply",
+      "opt_out",
+      "hard_bounce",
+      "complaint",
+      "meeting_booked",
+      "company_reply"
+    ],
+    "retry_on_ambiguous_error": false,
+    "auto_reassign_to_other_provider": false,
+    "no_resend_hostinger_for_unsolicited": true,
+    "days_between_steps": [
+      0,
+      3,
+      8
+    ],
+    "weekdays_only": true,
+    "office_hours_local": "09:00-17:00",
+    "no_zoho_mail_for_promotional_or_automated_cold_outreach": true
+  },
+  "markets": {
+    "ENIX": {
+      "cities": [
+        "Casablanca",
+        "Rabat",
+        "Tangier",
+        "Marrakech",
+        "Agadir",
+        "Dakhla",
+        "Laayoune"
+      ],
+      "segments": [
+        "event organizers",
+        "hotels hosting events",
+        "riads",
+        "travel agencies",
+        "real estate"
+      ]
+    },
+    "WENIX": {
+      "cities": [
+        "Casablanca",
+        "Rabat",
+        "Tangier",
+        "Marrakech",
+        "Agadir"
+      ],
+      "segments": [
+        "SMEs with website problems",
+        "hospitality",
+        "real estate",
+        "clinics",
+        "business services"
+      ]
+    }
+  },
+  "sender_platform": "Sendvanta",
+  "sender_platform_connection": "not_connected_to_ChatGPT",
+  "workspace_label": "Wenix/Enix",
+  "sender_platform_api_enabled": false,
+  "setup_gates": [
+    "verify sending-provider permits the intended cold B2B outreach",
+    "connect each authorized mailbox with SMTP and IMAP for reply/bounce handling",
+    "check SPF DKIM DMARC and sending domain DNS",
+    "import historic Enix Hostinger and Resend sends plus Wenix contacts into global suppression",
+    "seed delivery tests and review sequence copy",
+    "activate only after explicit confirmation"
+  ]
+}
