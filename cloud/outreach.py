@@ -89,15 +89,27 @@ def main():
     h, items = rows(leads)
     _, blocked = rows(suppression)
     _, history = rows(activity)
+    _, config_rows = rows(book.worksheet("Config"))
+    config = {r.get("key","").strip(): r.get("value","").strip() for _,r in config_rows}
+    # Require the independent private-Sheet switch as well as the GitHub variable.
+    enabled = ACTIVE and config.get("outbound_enabled", "").upper() == "TRUE"
     deny = {r.get("email","").strip().lower() for _,r in blocked}
-    sent_or_reserved = {r.get("email","").strip().lower()
-        for _,r in history if r.get("event","") in ("RESERVED","SENT","FOLLOWUP_1","FOLLOWUP_2")}
     # First contacts must not be retried across restarts; existing SENT rows remain eligible for approved follow-ups.
     already_first = {r.get("email","").strip().lower()
         for _,r in history if r.get("event","") in ("RESERVED","SENT")}
+    # A successful email generates both RESERVED and SENT events; count its message ID once.
+    accepted_events = ("RESERVED", "SENT", "FOLLOWUP_1", "FOLLOWUP_2")
     today = NOW.date().isoformat()
-    used = sum(1 for _,r in history if r.get("timestamp_utc","").startswith(today)
-               and r.get("event","") in ("RESERVED","SENT","FOLLOWUP_1","FOLLOWUP_2"))
+    used = len({r.get("message_id","") or
+               (r.get("timestamp_utc","") + ":" + r.get("email","") + ":" + r.get("event",""))
+               for _,r in history if r.get("timestamp_utc","").startswith(today)
+               and r.get("event","") in accepted_events})
+    # A reserved message with no terminal result might already have left SMTP.
+    # Never retry automatically; require manual reconciliation with the Sent folder.
+    committed = {r.get("message_id","") for _,r in history if r.get("event","") in
+                 ("SENT","FOLLOWUP_1","FOLLOWUP_2","ERROR") and r.get("message_id","")}
+    pending = {r.get("email","").strip().lower() for _,r in history
+               if r.get("event","") == "RESERVED" and r.get("message_id","") not in committed}
     weekday = NOW.astimezone(ZoneInfo("Africa/Casablanca")).weekday()
     hour = NOW.astimezone(ZoneInfo("Africa/Casablanca")).hour
     if weekday >= 5 or not 9 <= hour <= 16:
@@ -106,13 +118,13 @@ def main():
     if used >= 10:
         print("Daily cap reached")
         return
-    if not ACTIVE:
-        print("DRY RUN ONLY: send switch disabled")
+    if not enabled:
+        print("DRY RUN ONLY: at least one send switch disabled")
     replies = check_reply_addresses(os.environ.get("IMAP_HOST",""),
                                      SENDER, os.environ.get("SMTP_PASS",""))
     if not SENDER or not is_valid(SENDER):
         raise RuntimeError("Invalid authenticated sending address.")
-    if ACTIVE and not SENDER.endswith("@enix.ma"):
+    if enabled and not SENDER.endswith("@enix.ma"):
         raise RuntimeError("Refusing to send from non-Enix address.")
     sent_new, sent_total = 0, 0
     duplicate_guard = set()
@@ -121,7 +133,7 @@ def main():
         if not is_valid(addr) or addr in duplicate_guard:
             continue
         duplicate_guard.add(addr)
-        if addr in deny or row.get("status","").upper() in ("OPTED_OUT","BOUNCED","REPLIED","DONE"):
+        if addr in deny or addr in pending or row.get("status","").upper() in ("OPTED_OUT","BOUNCED","REPLIED","DONE"):
             continue
         if addr in replies:
             if row.get("status","").upper() not in ("REPLIED","DONE"):
@@ -147,7 +159,7 @@ def main():
                     "Seriez-vous la bonne personne pour en discuter ?\n\n"
                     "Si ce n’est pas pertinent, dites-le-moi et je ne vous relancerai pas.\n\n"
                     "Houssaine OULAHYANE\nEnix")
-        if not ACTIVE:
+        if not enabled:
             print("DRY RUN eligible row",index,"kind",("FIRST" if first else "FOLLOWUP"))
             continue
         mid = make_msgid(domain="enix.ma")
