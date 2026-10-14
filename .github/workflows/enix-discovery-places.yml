@@ -1,0 +1,28 @@
+name: ENIX Scheduled Business Discovery (Places API)
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "39 8 * * 1-5"
+permissions:
+  contents: read
+concurrency:
+  group: enix-discovery-places
+  cancel-in-progress: false
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.ENIX_GOOGLE_SERVICE_ACCOUNT_JSON }}
+      GOOGLE_SHEET_ID: ${{ secrets.ENIX_GOOGLE_SHEET_ID }}
+      GOOGLE_PLACES_API_KEY: ${{ secrets.ENIX_GOOGLE_PLACES_API_KEY }}
+      ENIX_DISCOVERY_ENABLED: ${{ vars.ENIX_DISCOVERY_ENABLED }}
+      ENIX_DISCOVERY_QUERY: ${{ vars.ENIX_DISCOVERY_QUERY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r cloud/requirements.txt
+      - name: Add new business leads to private sheet, without emailing
+        run: python cloud/discover.py
