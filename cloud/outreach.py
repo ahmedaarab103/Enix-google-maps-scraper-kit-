@@ -21,6 +21,7 @@ UTC = timezone.utc
 NOW = datetime.now(UTC)
 SENDER = os.environ.get("SMTP_USER", "").strip().lower()
 ACTIVE = os.environ.get("ENIX_SEND_ENABLED", "").lower() == "true"
+PORTFOLIO_URL = "https://enix.ma/photography-portfolio-marrakech"
 
 def dateval(value):
     if not value:
@@ -158,7 +159,12 @@ def main():
             body = ("Bonjour, je reviens brièvement sur mon message précédent. "
                     "Seriez-vous la bonne personne pour en discuter ?\n\n"
                     "Si ce n’est pas pertinent, dites-le-moi et je ne vous relancerai pas.\n\n"
+                    "Portfolio photo & vidéo : " + PORTFOLIO_URL + "\n\n"
                     "Houssaine OULAHYANE\nEnix")
+        # Mandatory: do not send any initial or follow-up missing the Enix portfolio.
+        if PORTFOLIO_URL not in body:
+            print("Skipping row", index, "because the mandatory portfolio URL is absent")
+            continue
         if not enabled:
             print("DRY RUN eligible row",index,"kind",("FIRST" if first else "FOLLOWUP"))
             continue
