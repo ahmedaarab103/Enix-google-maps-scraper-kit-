@@ -33,7 +33,7 @@ class EventUrgencyTests(unittest.TestCase):
         self.assertEqual(prioritize("2026-11-01","ftp://events.example",today=TODAY)[0],"RESEARCH")
     def test_score_sheet_dry_run_does_not_write(self):
         ds=(date.today()+timedelta(days=10)).isoformat()
-        b=FakeBook(saved=[{"company":"Conference Team","city":"Marrakech Morocco",
+        b=FakeBook(saved=[{"company":"Conference Team","city":"Marrakech Morocco","event_title":"Conference 2026",
             "event_date":ds,"event_source_url":EVENT_URL,
             "coverage_need":"UNKNOWN","priority":"RESEARCH"}])
         out=refresh_priorities(b,apply=False)
@@ -41,7 +41,7 @@ class EventUrgencyTests(unittest.TestCase):
         self.assertEqual(b.tabs["Leads"].records[0]["priority"],"RESEARCH")
     def test_explicit_apply_updates_only_priority(self):
         ds=(date.today()+timedelta(days=9)).isoformat()
-        b=FakeBook(saved=[{"company":"Event Organizers","city":"Marrakech Morocco",
+        b=FakeBook(saved=[{"company":"Event Organizers","city":"Marrakech Morocco","event_title":"Summit 2026",
             "event_date":ds,"event_source_url":EVENT_URL,
             "coverage_need":"OPEN_BRIEF","coverage_need_source_url":BRIEF_URL,
             "priority":"RESEARCH","approved":"NO"}])
@@ -49,6 +49,11 @@ class EventUrgencyTests(unittest.TestCase):
         self.assertEqual(out["priority_updates"],1)
         self.assertEqual(b.tabs["Leads"].records[0]["priority"],"P1")
         self.assertEqual(b.tabs["Leads"].records[0]["approved"],"NO")
+    def test_named_event_is_required_for_urgency(self):
+        row={"event_date":"2026-10-22","event_source_url":EVENT_URL,
+             "coverage_need":"OPEN_BRIEF","coverage_need_source_url":BRIEF_URL}
+        self.assertEqual(classify_row(row,today=TODAY)[0],"RESEARCH")
+
     def test_scraped_organizer_has_no_invented_event_date(self):
         from discover_scraper import normalized_records
         from pathlib import Path
