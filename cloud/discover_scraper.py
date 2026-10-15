@@ -23,12 +23,13 @@ from google.oauth2.service_account import Credentials
 
 ROOT = Path(__file__).resolve().parents[1]
 FIELDS = ("company", "city", "website", "industry", "country", "status",
-          "approved", "notes", "source_url")
+          "approved", "notes", "source_url", "event_title", "event_date",
+          "event_source_url", "coverage_need", "coverage_need_source_url", "priority")
 MAX_LEADS = 10
 DEPTH = 2
 MAX_TIME = 180
 DEFAULT_CITY = "Marrakech Morocco"
-DEFAULT_QUERY = "hotels and riads in Marrakech Morocco"
+DEFAULT_QUERY = "event organizers in Marrakech Morocco"
 CONFIG_MARKER = "scraper_last_started_utc"
 
 
@@ -73,8 +74,14 @@ def normalized_records(csv_path, city=DEFAULT_CITY):
                 "country": "Morocco",
                 "status": "NEW",
                 "approved": "NO",
-                "notes": "Scraper discovery: independently verify this business before outreach.",
+                "notes": "Event-sector organizer lead. Research a real upcoming event, date, source and any explicit supplier need before outreach.",
                 "source_url": "",
+                "event_title": "",
+                "event_date": "",
+                "event_source_url": "",
+                "coverage_need": "UNKNOWN",
+                "coverage_need_source_url": "",
+                "priority": "RESEARCH",
             })
             if len(records) >= MAX_LEADS:
                 break
