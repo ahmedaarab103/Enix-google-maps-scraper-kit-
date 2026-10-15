@@ -52,6 +52,8 @@ def prioritize(event_date, event_source_url, coverage_need="UNKNOWN",
 
 
 def classify_row(row, *, today=None):
+    if not str(row.get("event_title", "")).strip():
+        return "RESEARCH", "Named event not yet verified"
     return prioritize(row.get("event_date", ""), row.get("event_source_url",""),
                       row.get("coverage_need","UNKNOWN"),
                       row.get("coverage_need_source_url",""),today=today)
