@@ -9,8 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SAFE_KEYS = ("ENIX_DISCOVERY_ENABLED", "ENIX_SEND_ENABLED")
-PRIVATE_KEYS = ("GOOGLE_PLACES_API_KEY", "GOOGLE_SERVICE_ACCOUNT_JSON",
-                "GOOGLE_SHEET_ID", "SMTP_PASS", "SMTP_USER", "IMAP_HOST")
+PRIVATE_KEYS = ("GOOGLE_SERVICE_ACCOUNT_JSON", "GOOGLE_SHEET_ID")
 
 def main():
     print("ENIX Lightning AI — offline smoke test")
@@ -22,6 +21,7 @@ def main():
     for name in PRIVATE_KEYS:
         print(name + ":", "configured" if os.environ.get(name) else "not configured")
     print("Running mocked discovery / email tests; NO outbound network or email calls.")
+    print("Google Places API key is NOT required for the existing scraper.")
     result = subprocess.run(
         [sys.executable, "-m", "unittest", "discover", "-s", str(ROOT / "cloud"),
          "-p", "test_*.py", "-v"], cwd=ROOT, check=False)
