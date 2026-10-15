@@ -1,12 +1,12 @@
-name: ENIX Cloud Outreach (safe by default)
+name: ENIX Email Follow-Ups (disabled by default)
 on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "discovery or send"
+        description: "Send approved email queue (disabled until configured)"
         required: true
         type: choice
-        options: [discovery, send]
+        options: [send]
   schedule:
     - cron: "17 9 * * 1-5"
 permissions:
@@ -36,22 +36,3 @@ jobs:
       - run: pip install -r cloud/requirements.txt
       - name: Review replies and process approved queue
         run: python cloud/outreach.py
-  discovery:
-    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'discovery'
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Start original scraper locally on runner
-        run: |
-          docker compose up -d
-          for i in $(seq 1 30); do curl -fsS http://localhost:8080/api/v1/jobs && break || sleep 3; done
-      - name: Run a small discovery job (opt-in; review Google terms)
-        run: |
-          python scripts/scrape.py "${{ vars.ENIX_DISCOVERY_QUERY || 'hotels in Marrakech' }}" --city "${{ vars.ENIX_DISCOVERY_CITY || 'Marrakech Morocco' }}" --depth 3
-      - name: Export temporary results (do not put personal leads in public GitHub artifacts)
-        run: |
-          echo "Scraping finished. Connect an approved private data sink before keeping or distributing contact exports."
