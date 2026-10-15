@@ -1,49 +1,105 @@
-# ENIX — test in Lightning AI Studio (no live outreach)
+# ENIX — cautious existing scraper on Lightning AI (no Places API)
 
-This guide uses the user-owned Lightning account as a **development/testing environment**. It does **not** deploy the production cold-email sender to Lightning. Lightning's current terms restrict unsolicited/bulk email and some commercial activity without prior written consent. Keep production sending with Hostinger/GitHub Actions only after owner approval and service-provider policy review.
+Enix uses the existing `gosom/google-maps-scraper` project via its own `scripts/scrape.py`, **not** the Google Places API. A low volume reduces the chance of rate-limits, but Google Maps scraping may violate Google's terms. Do not attempt to bypass captchas, blocks or rate limits. Stop after failed responses, and use an authorized alternative if access is disallowed.
 
-## 1. Start a free CPU Studio
+This setup does NOT send cold emails. Keep sending through a separate, explicitly approved Hostinger/GitHub workflow. No SMTP credentials belong on Lightning AI.
 
-Log in to https://lightning.ai and choose **New Studio**. Select the free CPU option if available in your account. Open its terminal. No GPU is needed.
+## 1. Read and test safely (no credentials, no network)
 
-## 2. Run the Enix offline smoke test
-
-Paste these commands into the Studio terminal (no API keys or passwords):
+In the EXISTING Lightning Studio terminal:
 
 ```bash
-git clone --branch feature/cloud-outreach-safe --single-branch https://github.com/ahmedaarab103/Enix-google-maps-scraper-kit-.git
 cd Enix-google-maps-scraper-kit-
-python -m pip install -r cloud/requirements.txt
-python cloud/lightning_check.py
-```
-
-The check prints **13 tests**, finishing with **OK** and **PASS** when the environment works. It uses dummy companies and mocks email/network calls — nothing is scraped or sent.
-
-If the directory already exists, use:
-```bash
-cd Enix-google-maps-scraper-kit-
+git status --short
+# IMPORTANT: if you have local changes, commit or stash them before pulling.
 git fetch origin feature/cloud-outreach-safe
 git switch feature/cloud-outreach-safe
 git pull --ff-only
 python -m pip install -r cloud/requirements.txt
 python cloud/lightning_check.py
+python cloud/discover_scraper.py --mode dry-run --input cloud/fixtures/sample_businesses.csv
 ```
 
-## 3. Next steps after tests pass
+The sample file contains invented companies and fake .example websites. No scraping, networking, API keys, CRM writes or emails occur in the dry-run. The unit tests should all pass. Do not hardcode the expected test count; it can increase as checks are added.
 
-- For actual permitted lead discovery, use the official Google Places API integration in `cloud/discover.py`. It requires Google Places API billing/key and private Google Sheets service-account access; it must not be run until provider terms, intended commercial use, and any needed permission are addressed.
-- Store secrets in Lightning's encrypted **Teamspace > Settings > Secrets**, never in chat, GitHub or terminal history. Example names are `GOOGLE_PLACES_API_KEY`, `GOOGLE_SERVICE_ACCOUNT_JSON`, `GOOGLE_SHEET_ID`; don't add SMTP credentials to Lightning.
-- To keep the first live run safe, retain `ENIX_DISCOVERY_ENABLED=false`, `ENIX_SEND_ENABLED=false`, and CRM Config `outbound_enabled=FALSE` until the full workflow has been reviewed.
-- Lightning supports scheduled pipelines via the SDK; wait to schedule until a smoke test and data-processing approval succeed.
-- We have not connected ChatGPT directly to the Lightning account; you can execute these exact commands yourself in its Studio UI, and the connected GitHub app can update the repository code.
+## 2. Check Docker / existing scraper availability
 
-## How to tell ChatGPT the result
+The original kit needs its scraper API on `localhost:8080`. Check:
 
-Paste only the final output from `python cloud/lightning_check.py`, or share a screenshot of the Studio terminal. **Never send credentials or a screenshot containing secrets.**
+```bash
+docker info
+docker compose version
+```
 
-## Official references
+If Docker daemon and Compose are available inside this Studio, the extension may start the pinned image with:
 
-- https://lightning.ai/docs/platform/build/ai-studio
-- https://lightning.ai/docs/platform/inference/pipelines/scheduling
-- https://lightning.ai/docs/platform/security/security-features/secrets
-- https://lightning.ai/legal/terms-and-conditions/
+```bash
+docker compose up -d
+curl -fsS http://127.0.0.1:8080/api/v1/jobs
+```
+
+If `docker info` fails, DO NOT install a privileged daemon, expose port 8080 publicly, or make unsupported changes. Report the error and evaluate a supported Lightning Docker runtime / container, or keep scraper execution on GitHub Actions. Nothing should be exposed to the internet.
+
+## 3. Private Google Sheets integration (only for automatic lead saving)
+
+Google Places API credentials are **not needed**.
+
+The CRM is:
+https://docs.google.com/spreadsheets/d/1CD7ZNQKI2oQu6L-i4m4kVGT4f-sNAwbD0n662PZr2Ms/edit
+
+Required **Lightning encrypted secrets**:
+- `GOOGLE_SERVICE_ACCOUNT_JSON`: JSON of dedicated Google Sheets service account
+- `GOOGLE_SHEET_ID`: spreadsheet ID from the URL above
+
+Share the private CRM directly with that service-account email as Editor. Minimize access and protect key material; never paste private keys into chat, logs, or GitHub.
+
+Keep the CRM Config tab `discovery_enabled=FALSE` during initial testing.
+
+## 4. Minimal live scrape (manual approval REQUIRED)
+
+The runner file is `cloud/discover_scraper.py`. Default behavior is offline dry-run. Live mode requires BOTH:
+- Lightning environment variable `ENIX_DISCOVERY_ENABLED=true`
+- Private CRM Config tab `discovery_enabled=TRUE`
+
+It additionally requires credentials above and a working localhost scraper server.
+
+Only after the owner approves a single trial (and understands Google terms), invoke:
+
+```bash
+python cloud/discover_scraper.py --mode live
+```
+
+Safeguards enforced:
+- One small query: hotels and riads in Marrakech
+- Scraper depth 2, max job time 180 seconds
+- Explicitly `--no-email` and only business title/site/category/address
+- At most 10 unique business leads added to CRM, default NEW/approved NO
+- De-duplication by website domain and company/city
+- 24-hour no-retry marker in the private CRM Config tab
+- No bypasses, proxies, CAPTCHA evasion, parallel jobs, automatic retry, or public lead artifacts
+- Fail closed on missing secrets, disabled switches, inaccessible CRM or scraper errors
+- Output CSV deleted after ingestion; logs show counts only
+
+The guard is for accidental repeated calls, not a guarantee against every concurrent schedule race. Keep exactly one scheduled job with no overlaps.
+
+## 5. Scheduling (not yet activated)
+
+Only after ONE successful manual run and CRM verification, propose a Lightning schedule no more than **twice weekly** initially, e.g. Tuesdays and Fridays at 08:30 UTC. Verify the actual Lightning SDK scheduling syntax and Studio session/runtime behavior before registering. Don't silently activate paid compute or scheduled jobs.
+
+Set `ENIX_DISCOVERY_ENABLED=false` again after manual testing and until explicitly authorized to schedule.
+
+## 6. Email automation stays separate
+
+Enix's GitHub Actions sender requires its own authenticated SMTP/IMAP credentials and private-sheet setting `outbound_enabled=TRUE` *in addition* to GitHub var `ENIX_SEND_ENABLED=true`. Both are OFF by default and must remain so until a future approved outbound test.
+
+## 7. Report to ChatGPT
+
+Give:
+- Docker info/Compose output, without tokens or credentials
+- The last lines of offline test output
+- A dry-run summary count
+- Whether the private CRM service account is configured
+- If/when explicitly approved, number of business leads added by ONE live test
+- Any blocking error or extra cost needing approval
+
+Do not claim that a live scrape or the CRM import is tested when only mocked tests have run.
