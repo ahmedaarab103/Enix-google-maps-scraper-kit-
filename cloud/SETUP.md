@@ -1,30 +1,54 @@
-# ENIX cloud outreach — setup and safety
+# ENIX cloud infrastructure — current owner checklist
 
-This workflow uses GitHub Actions as cloud compute (no computer or local Docker required). ChatGPT can manage repository changes and Hostinger messages; GitHub secrets/variables and Google Sheets access still require initial owner configuration.
+Two separate pieces:
+1. **Lightning AI** = existing scraper, cautious discovery, private CRM insert. See [LIGHTNING_SETUP.md](LIGHTNING_SETUP.md).
+2. **GitHub Actions + Hostinger** = approved-only email sender. Off by default. This remains separate from Lightning because Lightning's acceptable-use rules restrict unsolicited email.
 
-## Required setup (before merging)
-1. Import the ENIX CRM template into a **private Google Sheet**. Share with the service account as editor; create a Google service-account JSON credential with access limited to this Sheet. Never put credentials or lead data into this public repository.
-2. In repository Actions secrets add:
-   - ENIX_GOOGLE_SERVICE_ACCOUNT_JSON (complete JSON)
-   - ENIX_GOOGLE_SHEET_ID (Sheet ID)
-   - ENIX_SMTP_HOST and ENIX_SMTP_PORT (verify Hostinger settings)
-   - ENIX_SMTP_USER, ENIX_SMTP_PASS
-   - ENIX_IMAP_HOST
-3. Repository Actions variable ENIX_SEND_ENABLED = false. **Do not turn on** until deliverability tests, successful dry run, and contacts approved. Set true only to authorize sending already approved rows.
-4. Repository Actions variables ENIX_DISCOVERY_QUERY, ENIX_DISCOVERY_CITY for manual discovery jobs. Discovery is manual-only. Google Maps scraping may violate Google's terms; consider compliant Places API or permissioned data providers instead.
-5. Current repo is public. Never enable artifact upload, console logging of lead data, or commit scraped data here.
+Google **Places** API is **not** required. Google **Sheets** API/service account is required for automatic CRM writes from either cloud service.
 
-## Sheet contract
-Tabs: Leads, Suppression, Activity, Config. Fields are supplied in the CRM template. For sending, set status READY and approved YES with a real verified recipient email, personalized subject and body. Leave blank if unverified.
-Activity logs are written for audit; Suppression holds opt-outs and do-not-contact.
-Follow-ups require approved YES, are capped at two, and are skipped if replied, suppressed or invalid.
+## Private CRM
 
-## Execution
-Manual Actions > ENIX Cloud Outreach > Run workflow > mode=send will run an audit/dry-run while ENIX_SEND_ENABLED is false.
-The same workflow runs weekday at 09:17 UTC. It stays in dry-run until turned on.
-Discovery runs only by manual dispatch and does not send messages or publish raw scraped results.
+Use the ENIX CRM spreadsheet in your connected Google account:
+https://docs.google.com/spreadsheets/d/1CD7ZNQKI2oQu6L-i4m4kVGT4f-sNAwbD0n662PZr2Ms/edit
 
-## Safety and operational limits
-No hidden mass sends. Small batches (max 5 new, 8 total per execution), weekday/time guard, hard per-day cap 10 based on Activity, domain/email dedupe, opt-outs, and replies checked over IMAP.
-Turn off ENIX_SEND_ENABLED immediately if bounce rates, errors or complaints rise. No provider can guarantee deliverability.
-The Google Sheet must be private, and access should be least privilege. Use an app-specific mailbox password if supported and revoke any old Sendvanta credentials.
+Tabs: Leads, Suppression, Activity, Config.
+Discovery: new leads are status NEW and approved NO. No emails are collected by the initial scraper run.
+Config values `discovery_enabled=FALSE` and `outbound_enabled=FALSE` must stay FALSE until independently authorized.
+The scraper uses an additional `scraper_last_started_utc` marker to avoid repeating runs within 24 hours.
+
+## Lightning discovery
+
+Read `cloud/LIGHTNING_SETUP.md`.
+No Google Places key, no Google billing needed for the scraper itself.
+Run the offline unit tests and sample CSV dry run first; then verify Docker `localhost:8080` availability. Use minimal allowed volume and respect Google's terms; stop if blocked. The live runner requires encrypted private Sheets credentials and two discovery enabling switches.
+
+## GitHub Actions email sender (NOT LIVE)
+
+In repository Actions secrets (not chat or committed code), configure:
+- ENIX_GOOGLE_SERVICE_ACCOUNT_JSON
+- ENIX_GOOGLE_SHEET_ID
+- ENIX_SMTP_HOST, ENIX_SMTP_PORT
+- ENIX_SMTP_USER, ENIX_SMTP_PASS
+- ENIX_IMAP_HOST
+
+In repository Actions variables:
+- ENIX_SEND_ENABLED=false
+
+Do not change the variable to true until:
+1. Service-account access to private CRM is verified.
+2. Hostinger SMTP and IMAP credentials are tested safely.
+3. Bounces and unsubscribes are accounted for.
+4. Sending test to an owner-controlled address passes.
+5. Owner explicitly approves outbound sending.
+
+The GitHub sender also requires Config `outbound_enabled=TRUE`. No email goes out unless both switches are enabled and individual leads are approved YES.
+
+Safety: Weekdays during Morocco business hours, up to 5 new / 8 total per run and 10/day, no automated retry of unknown sends, two follow-ups at most, opt-out and reply exclusions.
+
+## Status
+
+- Offline GitHub unit tests passed, including scraper simulation.
+- Lightning's earlier 13 tests passed according to the owner-controlled extension; newly added tests must be re-run there.
+- No real scrape or unattended sending has been verified/activated through this branch.
+- The previous Google Places scheduled workflow has been removed from this branch.
+- Public repository must never contain secrets or personal lead datasets.
