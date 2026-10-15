@@ -1,0 +1,6 @@
+title,website,category,address,emails,phone
+Atlas Riad,https://atlas-riad.example,Riad,"Marrakech, Morocco",private@example.org,12345
+Atlas Riad Duplicate,https://www.atlas-riad.example/contact,Hotel,"Marrakech, Morocco",other@example.org,56789
+Desert Garden,https://desert-garden.example,Hotel,"Marrakech, Morocco",owner@example.org,333
+Different Company,ftp://invalid.example,Hotel,"Marrakech, Morocco",x@example.org,222
+,https://nameless.example,Hotel,"Marrakech, Morocco",,

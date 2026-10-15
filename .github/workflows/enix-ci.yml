@@ -1,0 +1,24 @@
+name: ENIX Cloud Safe Tests
+on:
+  pull_request:
+    paths:
+      - "cloud/**"
+      - ".github/workflows/enix-*.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-safety-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install cloud dependencies
+        run: pip install -r cloud/requirements.txt
+      - name: Check Python syntax
+        run: python -m compileall -q cloud/
+      - name: Offline simulator (never sends external emails)
+        run: python -m unittest discover -s cloud -p 'test_*.py' -v

@@ -1,0 +1,38 @@
+name: ENIX Email Follow-Ups (disabled by default)
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Send approved email queue (disabled until configured)"
+        required: true
+        type: choice
+        options: [send]
+  schedule:
+    - cron: "17 9 * * 1-5"
+permissions:
+  contents: read
+concurrency:
+  group: enix-cloud-outreach
+  cancel-in-progress: false
+jobs:
+  send:
+    if: github.event_name == 'schedule' || inputs.mode == 'send'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.ENIX_GOOGLE_SERVICE_ACCOUNT_JSON }}
+      GOOGLE_SHEET_ID: ${{ secrets.ENIX_GOOGLE_SHEET_ID }}
+      SMTP_HOST: ${{ secrets.ENIX_SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.ENIX_SMTP_PORT }}
+      SMTP_USER: ${{ secrets.ENIX_SMTP_USER }}
+      SMTP_PASS: ${{ secrets.ENIX_SMTP_PASS }}
+      IMAP_HOST: ${{ secrets.ENIX_IMAP_HOST }}
+      ENIX_SEND_ENABLED: ${{ vars.ENIX_SEND_ENABLED }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r cloud/requirements.txt
+      - name: Review replies and process approved queue
+        run: python cloud/outreach.py
