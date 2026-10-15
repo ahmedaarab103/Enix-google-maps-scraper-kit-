@@ -70,10 +70,10 @@ python cloud/discover_scraper.py --mode live
 ```
 
 Safeguards enforced:
-- One small query: hotels and riads in Marrakech
+- One small query: event organizers in Marrakech (Google Maps finds businesses, NOT event dates)
 - Scraper depth 2, max job time 180 seconds
 - Explicitly `--no-email` and only business title/site/category/address
-- At most 10 unique business leads added to CRM, default NEW/approved NO
+- At most 10 unique event-organizer leads added to CRM, default NEW/approved NO, event dates blank, coverage_need UNKNOWN, priority RESEARCH
 - De-duplication by website domain and company/city
 - 24-hour no-retry marker in the private CRM Config tab
 - No bypasses, proxies, CAPTCHA evasion, parallel jobs, automatic retry, or public lead artifacts
@@ -82,17 +82,41 @@ Safeguards enforced:
 
 The guard is for accidental repeated calls, not a guarantee against every concurrent schedule race. Keep exactly one scheduled job with no overlaps.
 
-## 5. Scheduling (not yet activated)
+## 5. Event-first qualification — prioritize REAL approaching events
+
+Our focus is **corporate conferences, congresses, trade fairs, exhibitions, product launches, openings and established event management agencies**, initially Marrakech. The Maps scraper finds event companies, *not the dates of their upcoming conferences*.
+
+For each organizer, research a **specific public upcoming event** from the organizer's official site or a credible event calendar. Enter these CRM Leads fields:
+- `event_title`: title of the particular conference/exhibition/opening
+- `event_date`: verified event start date in YYYY-MM-DD
+- `event_source_url`: credible source showing the date and event
+- `coverage_need`: UNKNOWN by default; OPEN_BRIEF only if organizer has *explicitly published a need for photography/videography suppliers*
+- `coverage_need_source_url`: actual tender or supplier request documenting that need
+- `priority`: initially RESEARCH; use the offline scoring logic after verification
+
+Scoring is **evidence-based**, not a claim about a client without proof. `P1` means an independently documented open photo/video brief and event within 21 days. `P2` means confirmed event within 45 days but the need is unknown, or a later open brief. `P3` is a verified event within 90 days. Missing event date/source stays RESEARCH.
+
+With Sheets secrets configured, review priorities without writing:
+```bash
+python cloud/score_event_leads.py
+```
+To write ONLY the priority field, after owner approval:
+```bash
+ENIX_SCORE_APPLY_ENABLED=true python cloud/score_event_leads.py --apply
+```
+No prospect is automatically approved or contacted. Do not fabricate dates, budgets, or supplier needs. Verify publicly listed business contact information and comply with opt-outs.
+
+## 6. Scheduling (not yet activated)
 
 Only after ONE successful manual run and CRM verification, propose a Lightning schedule no more than **twice weekly** initially, e.g. Tuesdays and Fridays at 08:30 UTC. Verify the actual Lightning SDK scheduling syntax and Studio session/runtime behavior before registering. Don't silently activate paid compute or scheduled jobs.
 
 Set `ENIX_DISCOVERY_ENABLED=false` again after manual testing and until explicitly authorized to schedule.
 
-## 6. Email automation stays separate
+## 7. Email automation stays separate
 
 Enix's GitHub Actions sender requires its own authenticated SMTP/IMAP credentials and private-sheet setting `outbound_enabled=TRUE` *in addition* to GitHub var `ENIX_SEND_ENABLED=true`. Both are OFF by default and must remain so until a future approved outbound test.
 
-## 7. Report to ChatGPT
+## 8. Report to ChatGPT
 
 Give:
 - Docker info/Compose output, without tokens or credentials
