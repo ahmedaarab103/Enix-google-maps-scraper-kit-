@@ -46,7 +46,7 @@ class FakeSMTP:
 
 def lead(email_addr="client@example.org",**kwargs):
     r={"company":"Example Company","email":email_addr,"status":"READY","approved":"YES",
-       "subject":"Bonjour","body":"Je vous contacte pour un projet photo.","followup_count":"0"}
+       "subject":"Bonjour","body":"Je vous contacte pour un projet photo.\n\nPortfolio photo & vidéo : https://enix.ma/photography-portfolio-marrakech","followup_count":"0"}
     r.update(kwargs)
     return r
 
@@ -77,6 +77,16 @@ class OutreachSafetyTests(unittest.TestCase):
     def test_private_crm_switch_blocks_even_when_actions_enabled(self):
         self.run_book(FakeBook([lead()],enabled="FALSE"),True)
         self.assertEqual(len(FakeSMTP.sent),0)
+    def test_missing_portfolio_blocks_initial_send(self):
+        b=FakeBook([lead(body="Hello, photo coverage available.")],enabled="TRUE")
+        self.run_book(b,True)
+        self.assertEqual(len(FakeSMTP.sent),0)
+        self.assertEqual(len(b.tabs["Activity"].records),0)
+    def test_followup_always_includes_portfolio(self):
+        b=FakeBook([lead(status="SENT",last_sent_utc="2026-10-10T00:00:00+00:00")],enabled="TRUE")
+        self.run_book(b,True)
+        self.assertEqual(len(FakeSMTP.sent),1)
+        self.assertIn(outreach.PORTFOLIO_URL,FakeSMTP.sent[0].get_content())
     def test_only_approved_and_deduplicated(self):
         b=FakeBook([lead(),lead("client@example.org",company="Duplicate"),
             lead("unapproved@example.org",approved="NO")],enabled="TRUE")
