@@ -36,6 +36,8 @@ def _domain(url):
     value = (url or "").strip()
     if not value:
         return ""
+    if "://" in value and not value.startswith(("https://", "http://")):
+        return ""
     if not value.startswith(("https://", "http://")):
         value = "https://" + value
     p = urlparse(value)
@@ -188,6 +190,8 @@ def main():
         # Owner explicitly supplied CSV; still requires private service-account access.
         print("Imported new business records:", _import(_open_book(),records))
         return
+    if os.getenv("ENIX_DISCOVERY_ENABLED", "").lower() != "true":
+        raise RuntimeError("Discovery disabled; no Sheets access or scraping attempted.")
     book = _open_book()
     _start_guard(book)  # reserves the daily attempt BEFORE touching Google Maps
     output = _live_csv()
